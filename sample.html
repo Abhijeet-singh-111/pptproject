@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PptxGenJS Example</title>
+  <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/libs/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
+</head>
+<body>
+  <button onclick="generatePPT()">Generate PPT</button>
+
+  <script>
+    function generatePPT() {
+      const pptx = new PptxGenJS();
+
+      // Define content for multiple slides
+      const slidesContent = [
+        [
+          { text: "Hello Slide 1", x: 1, y: 1, fontSize: 24, color: '0000FF' },
+          { text: "Blue Text", x: 1, y: 1.5, fontSize: 18, color: '00F' }
+        ],
+        [
+          { text: "Slide 2 Title", x: 1, y: 1, fontSize: 26, color: 'FF0000' },
+          { text: "Red Subtitle", x: 1, y: 2, fontSize: 20, color: 'F00' }
+        ],
+        [
+          { text: "Slide 3!", x: 2, y: 2, fontSize: 30, color: '00AA00' },
+          { text: "Green Corner", x: 5, y: 4, fontSize: 16, color: '0A0' }
+        ]
+      ];
+
+      // Generate slides
+      slidesContent.forEach((group, index) => {
+        const slide = pptx.addSlide();
+
+        group.forEach(item => {
+          slide.addText(item.text, {
+            x: item.x,
+            y: item.y,
+            fontSize: item.fontSize,
+            color: item.color,
+            fontFace: 'Arial',
+            bold: true
+          });
+        });
+      });
+
+      pptx.writeFile("GroupedTextSlides.pptx");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pure JS Drag & Resize with Transform</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="modal.css" />
+  <link rel="stylesheet" href="./richtexteditor/res/style.css">
+  <link rel="stylesheet" href="./richtexteditor/richtexteditor/rte_theme_default.css" />
+</head>
+<body>
+
+
+<div id="container" class="wrapper">
+  <div id="toolbararea" class="optionsArea order-1">
+    <div class="content">
+      <button id="resetbtn" class="noprint">Reset</button>
+      <button id="editall" class="noprint">Edit All</button>
+      <ul>
+        <li class="space-between"><div class="parentdrag"></div> Parent Move</li>
+        <li class="space-between"><div class="parentresize"></div> Parent Resize</li>
+        <li class="space-between"><div class="childdrag"></div> Child Move</li>
+        <li class="space-between"><div class="childresize"></div> Child Resize</li>
+      </ul>
+      <div class="noprint config_btn AddQuestionNO">Question Number</div>
+      <div class="noprint config_btn changeLanguage" data-type="question" data-lng="english">Question Englsih</div>
+      <div class="noprint config_btn changeLanguage" data-type="question" data-lng="hindi">Question Hindi</div>
+      <div class="noprint config_btn changeLanguage" data-type="question" data-lng="both">Question Both</div>
+      <div class="noprint config_btn changeLanguage" data-type="option" data-lng="english">Option Englsih</div>
+      <div class="noprint config_btn changeLanguage" data-type="option" data-lng="hindi">Option Hindi</div>
+      <div class="noprint config_btn changeLanguage" data-type="option" data-lng="both">Option Both</div>
+      <!-- switch left to right -->
+      <div class="noprint config_btn switchPosition">Switch LTR to RTL</div>
+      <!-- switch left to right -->
+      <!-- swith questions lang position -->
+      <div class="noprint config_btn switchQuestionsLang">Switch Language Position</div>
+      <!-- swith questions lang position -->
+      <div class="noprint">
+        <input style="width: 95%;" type="range" class="changeWidth" min="40" max="100" value="100" />
+      </div>
+
+      <button id="toggleFollowAllBtn" class="noprint btn-toggle">Toggle Follow On</button>
+
+      <div class="noprint" style="width: 100%; margin: 5px; display: flex; align-items: center;">
+        <select id="pageSizeSelect" style="width: 50%;">
+          <option value="none" selected>--Select--</option>
+          <option value="a4">A4</option>
+          <option value="letter">Letter</option>
+        </select>
+        <button style="margin: 0 3px;" onclick="window.print()" class="noprint">🖨️ Print</button>
+      </div>
+      
+      <div id="status"></div>
+      <button class="generateppt-btn" onclick="generatePPT()">Generate PPT</button>
+    </div>
+  </div>
+
+  <!-- content area -->
+  <div class="rightarea order-2" id="mainPage" style="width: 100%; margin: auto;">
+    <div class="QuestionArea">
+      <div style="float:right;width:100%;" id="container">
+        <div style="float:left;width:95%;border:solid 4px white;padding:4px;">
+          <div class="alterable parent" style="transform: translate(0px, 0px); text-wrap: wrap;">
+            <label class="alterable q_index" style="color: #ff0000;font-size:30px;font-weight:600;">Q. <span class="changeQNo q_index" style="display:none;color: #ff0000;font-size:30px;font-weight:600;">1</span></label>&nbsp;
+            <span id="fullElement" class="lng_english" style="display:none;color: #0000ff !important;font-weight:600;font-size:30px;">
+              11Find a quadratic polynomial whose sum and product of zeroes are 5, 7 respectively. </br></span>
+            <span class="lng_hindi" style="color: #ff0000;font-size:30px;font-weight:600;">एक द्विघात बहुपद ज्ञात कीजिए, जिसके शून्यांकों के योग तथा गुणनफल क्रमश: 5, 7 है।</span>
+            <span class="noprint alterable in_serial" style="color:#ff0000;font-size:12px;font-weight:600; display: inline-flex;">6685954</span>
+          </div>
+        </div>
+  
+        <div class="alterable parent" style="width:max-content;display: flex;flex-direction: column;">
+          </br>
+          <div class="alterable parent" style="display:inline-flex;margin-left: 5px;">
+            <span class="alterable o_index" style="font-size:30px;font-weight:600;">(a)</span>&nbsp;
+            <span class="lng_eng qoption_english optionPosition alterable" style="display:none;font-size:30px;font-weight:600;"><p>x11<sup>2</sup>&nbsp;+ 5x + 7</p></span>
+            <span class="option_both_slash alterable" style="display:none;padding:0px 2px;font-size:30px;font-weight:600;"> / </span>
+            <span class="lng_hin qoption_hindi optionPosition alterable" style="display:inline;font-size:30px;font-weight:600;">
+              <p style="margin: 0;">xa<sup>2</sup>&nbsp;+ 5x + 7(hindi)</p>
+            </span>
+          </div>
+          
+          <div class="alterable parent" style="display:inline-flex;margin-left: 5px;">
+            <span class="alterable o_index" style="font-size:30px;font-weight:600;">(b)</span>&nbsp;
+            <span class="lng_eng qoption_english optionPosition alterable" style="display:none;font-size:30px;font-weight:600;"><p>x11<sup>2</sup>&nbsp;+ 5x + 7</p></span>
+            <span class="option_both_slash alterable" style="display:none;padding:0px 2px;font-size:30px;font-weight:600;"> / </span>
+            <span class="lng_hin qoption_hindi optionPosition alterable" style="display:inline;font-size:30px;font-weight:600;">
+              <p style="margin: 0;">xb<sup>2</sup>&nbsp;+ 5x + 7(hindi)</p>
+            </span>
+          </div>
+          
+          <div class="alterable parent" style="display:inline-flex;margin-left: 5px;">
+            <span class="alterable o_index" style="font-size:30px;font-weight:600;">(c)</span>&nbsp;
+            <span class="lng_eng qoption_english optionPosition alterable" style="display:none;font-size:30px;font-weight:600;"><p>x11<sup>2</sup>&nbsp;+ 5x + 7</p></span>
+            <span class="option_both_slash alterable" style="display:none;padding:0px 2px;font-size:30px;font-weight:600;"> / </span>
+            <span class="lng_hin qoption_hindi optionPosition alterable" style="display:inline;font-size:30px;font-weight:600;">
+              <p style="margin: 0;">xc<sup>2</sup>&nbsp;+ 5x + 7(hindi)</p>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br/>
+    <div class="QuestionArea">
+      <div style="float:right;width:100%;" id="container">
+        <div style="float:left;width:95%;border:solid 4px white;padding:4px;">
+          <div class="alterable parent" style="transform: translate(0px, 0px); text-wrap: wrap;">
+            <label class="alterable q_index" style="color: #ff0000;font-size:30px;font-weight:600;">Q. <span class="changeQNo q_index" style="display:none;color: #ff0000;font-size:30px;font-weight:600;">1</span></label>&nbsp;
+            <span id="fullElement" class="lng_english" style="display:none;color: #0000ff !important;font-weight:600;font-size:30px;">
+              11Find a quadratic polynomial whose sum and product of zeroes are 5, 7 respectively. </br></span>
+            <span class="lng_hindi" style="color: #ff0000;font-size:30px;font-weight:600;">एक द्विघात बहुपद ज्ञात कीजिए, जिसके शून्यांकों के योग तथा गुणनफल क्रमश: 5, 7 है।</span>
+            <span class="noprint alterable in_serial" style="color:#ff0000;font-size:12px;font-weight:600; display: inline-flex;">6685954</span>
+          </div>
+        </div>
+  
+        <div class="alterable parent" style="width:max-content;display: flex;flex-direction: column;">
+          </br>
+          <div class="alterable parent" style="display:inline-flex;margin-left: 5px;">
+            <span class="alterable o_index" style="font-size:30px;font-weight:600;">(a)</span>&nbsp;
+            <span class="lng_eng qoption_english optionPosition alterable" style="display:none;font-size:30px;font-weight:600;"><p>x11<sup>2</sup>&nbsp;+ 5x + 7</p></span>
+            <span class="option_both_slash alterable" style="display:none;padding:0px 2px;font-size:30px;font-weight:600;"> / </span>
+            <span class="lng_hin qoption_hindi optionPosition alterable" style="display:inline;font-size:30px;font-weight:600;">
+              <p style="margin: 0;">xa<sup>2</sup>&nbsp;+ 5x + 7(hindi)</p>
+            </span>
+          </div>
+          
+          <div class="alterable parent" style="display:inline-flex;margin-left: 5px;">
+            <span class="alterable o_index" style="font-size:30px;font-weight:600;">(b)</span>&nbsp;
+            <span class="lng_eng qoption_english optionPosition alterable" style="display:none;font-size:30px;font-weight:600;"><p>x11<sup>2</sup>&nbsp;+ 5x + 7</p></span>
+            <span class="option_both_slash alterable" style="display:none;padding:0px 2px;font-size:30px;font-weight:600;"> / </span>
+            <span class="lng_hin qoption_hindi optionPosition alterable" style="display:inline;font-size:30px;font-weight:600;">
+              <p style="margin: 0;">xb<sup>2</sup>&nbsp;+ 5x + 7(hindi)</p>
+            </span>
+          </div>
+          
+          <div class="alterable parent" style="display:inline-flex;margin-left: 5px;">
+            <span class="alterable o_index" style="font-size:30px;font-weight:600;">(c)</span>&nbsp;
+            <span class="lng_eng qoption_english optionPosition alterable" style="display:none;font-size:30px;font-weight:600;"><p>x11<sup>2</sup>&nbsp;+ 5x + 7</p></span>
+            <span class="option_both_slash alterable" style="display:none;padding:0px 2px;font-size:30px;font-weight:600;"> / </span>
+            <span class="lng_hin qoption_hindi optionPosition alterable" style="display:inline;font-size:30px;font-weight:600;">
+              <p style="margin: 0;">xc<sup>2</sup>&nbsp;+ 5x + 7(hindi)</p>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- content area -->
+</div> 
+
+<!-- modal -->
+<div class="modal-wrapper" id="customModal1">
+  <div class="modal-content">
+      <div class="modal-header">
+          <h5 class="modal-title">Editor</h5>
+          <button type="button" class="modal-close-button" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+          <span id="modalSpanContainer">This content is defined directly in the HTML for **Modal 1**.</span>
+      </div>
+      <div class="modal-footer">
+          <button type="button" class="btn-secondary modal-close-button">Close</button>
+      </div>
+  </div>
+</div>
+<!-- modal -->
+<script src="./js/modal.js"></script>
+<script src="./js/jQueryv3.7.1.min.js"></script>
+<script src="./js/jszip.min.js"></script>
+<script src="./js/pptxgen.min.js"></script>
+<script src="./richtexteditor/res/patch.js"></script>
+<script type="text/javascript" src="./richtexteditor/richtexteditor/rte.js"></script>
+<script>RTE_DefaultConfig.url_base='../mono/richtexteditor/richtexteditor'</script>
+<script type="text/javascript" src='./richtexteditor/richtexteditor/plugins/all_plugins.js'></script>
+
+<script>
+let currentPageSize = 'none';
+let syncElements = true;
+let savedPositions = JSON.parse(localStorage.getItem('savedPositions')) || {};
+let mainPage = document.getElementById('mainPage');
+const questionAreas = document.querySelectorAll('.QuestionArea');
+const toggleFollowBtn = document.getElementById('toggleFollowAllBtn');
+const body = document.querySelector('body');
+let modalSpanContainer = document.getElementById('modalSpanContainer');
+let editAll = document.getElementById('editall');
+
+let editorInstances = new Map();
+let backupTransform = null;
+let originalTextContent;
+
+// Initialize modal with callbacks
+const myModal = document.getElementById('customModal1');
+const modal1 = new Modal(myModal);
+
+modal1.modalEl.addEventListener('modal.shown', (event) => {
+  console.log(`Modal with ID ${event.detail.modalId} was shown.`);
+});
+
+modal1.modalEl.addEventListener('modal.hidden', (event) => {
+  console.log(`Modal with ID ${event.detail.modalId} was hidden.`);
+
+  // Loop through each editor instance in the map
+  editorInstances.forEach(([editor, el], edicontent) => { console.log('==in ittt:', el);
+      // Check if the element does not have the class .richtexteditor
+      if (edicontent.classList.contains('richtexteditor')) { console.log('==in ittt 2', edicontent);
+        const content = editor.getHTML();
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content; 
+        const element = tempDiv.firstElementChild;
+        console.log('this element closed::', tempDiv.innerHTML);
+        el.innerHTML = element.innerHTML;
+        editor.delete();
+
+        const classesToRemove = [
+          'richtexteditor', 'rte-skin-default', 'rte-modern', 
+          'rte-toolbar-default', 'rte-desktop', 'rte-mobile'
+        ];
+        classesToRemove.forEach(cls => edicontent.classList.remove(cls));
+        modalSpanContainer.innerHTML = '';
+        // Clear the editorInstances map
+        editorInstances.clear();
+      }
+    });
+
+    rebindAttachments();
+    document.querySelectorAll('.alterable.active').forEach(el => {
+      el.classList.remove('active');
+      removeZeroTranslate(el);
+    });
+});
+
+function parseTranslate(transform) {
+  const match = /translate\(([-\d.]+)px,\s*([-\d.]+)px\)/.exec(transform);
+  return match ? [parseFloat(match[1]), parseFloat(match[2])] : [0, 0];
+}
+
+function rgbToHex(rgb) {
+  const result = rgb.match(/\d+/g);
+  if (!result || result.length < 3) return null;
+
+  const r = parseInt(result[0]).toString(16).padStart(2, '0');
+  const g = parseInt(result[1]).toString(16).padStart(2, '0');
+  const b = parseInt(result[2]).toString(16).padStart(2, '0');
+
+  return `#${r}${g}${b}`.toUpperCase();
+}
+
+editAll.addEventListener('click', function(){
+  createEditor(mainPage);
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  const savedToggleState = localStorage.getItem('followToggleState') || 'on'; // default to 'on'
+  if (savedToggleState === 'on') {
+    syncElements = false;
+    toggleFollowBtn.textContent = 'Turn Follow All Off';
+  } else {
+    syncElements = true;
+    toggleFollowBtn.textContent = 'Turn Follow All On';
+  }
+});
+
+function rebindAttachments(){
+  document.querySelectorAll('.alterable').forEach((el, index) => {
+    el.addEventListener('click', () => {
+      if (el.classList.contains('active')) return; console.log('clicked::');
+      
+      if (!el.style.transform) el.style.transform = 'translate(0px, 0px)';
+      el.classList.add('active');
+      
+      if (![...el.children].some(child => child.classList.contains('drag-btn'))) {
+        const dragBtn = document.createElement('div');
+        dragBtn.className = 'drag-btn';
+        el.appendChild(dragBtn);
+        enableDrag(el, dragBtn);
+        console.log('added:', el.classList.contains('parent') ? 'parent' : 'alterable', el);
+      }
+
+      if (![...el.children].some(child => child.classList.contains('resize-btn'))) {
+        const resizeBtn = document.createElement('div');
+        resizeBtn.className = 'resize-btn';
+        el.appendChild(resizeBtn);
+        enableResize(el, resizeBtn);
+      }
+
+      if (!el.classList.contains('parent') && !el.querySelector('.options-btn')) {
+        const optionsBtn = document.createElement('div');
+        optionsBtn.className = 'options-btn';
+        el.appendChild(optionsBtn);
+        createCustomSelectWithIcons(optionsBtn);
+      }
+      
+      applySavedFollowSetting();
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  rebindAttachments();
+  
+  document.addEventListener('click', function (event) {
+    if (!event.target.closest('.alterable')) {
+      document.querySelectorAll('.alterable.active').forEach(el => {
+        el.classList.remove('active');
+        removeZeroTranslate(el);
+      });
+    }
+  });
+
+  /* initiateLabelsAndTools(); */
+});
+
+function findAlterableParent(el) {
+  let current = el;
+  while (current) {
+    if (current.classList && current.classList.contains('alterable')) {
+      return current;
+    }
+    current = current.parentElement;
+  }
+  return el; // fallback if no .alterable parent found
+}
+
+function removeInlineStylePropertyIfExists(element, property) {
+  const value = element.style.getPropertyValue(property);
+  if (value) {
+    element.style.removeProperty(property);
+  }
+}
+
+function createCustomSelectWithIcons(optionsBtnNode) {
+  const optionData = [
+    {
+      label: 'Edit',
+      value: 'Edit',
+      icon: 'icons/edit.svg',
+      onSelect: (e) => {
+        let myelement = findAlterableParent(optionsBtnNode);
+        createEditor(myelement);
+        console.log('element selected!', myelement);
+      }
+    },
+    {
+      label: 'Edit Group',
+      value: 'Edit Group',
+      icon: 'icons/group-edit.svg',
+      onSelect: () => {
+        let myelement = findAlterableParent(optionsBtnNode);
+        let parentClass = myelement.closest('.QuestionArea');
+        if(parentClass){
+          createEditor(parentClass);
+        }
+        console.log('--here it iss------->>>>>>');
+        // Your text logic here
+      }
+    }
+  ];
+
+  let dropdown;
+  function closeDropdown() {
+    if (dropdown && dropdown.parentNode) {
+      dropdown.remove();
+      document.removeEventListener('click', handleClickOutside);
+      dropdown = null;
+    }
+  }
+
+  function handleClickOutside(e) {
+    if (dropdown && !dropdown.contains(e.target) && !optionsBtnNode.contains(e.target)) {
+      closeDropdown();
+    }
+    
+  }
+
+  optionsBtnNode.addEventListener('click', (ev) => {
+    // Close if already open
+    if (dropdown) {
+      closeDropdown();
+      return;
+    }
+
+    // Create dropdown container
+    dropdown = document.createElement('div');
+    dropdown.className = 'custom-select-dropdown';
+
+    optionData.forEach(item => {
+      const option = document.createElement('div');
+      option.className = 'custom-option';
+      option.innerHTML = `
+        <img src="${item.icon}" class="custom-option-icon" />
+        <div>${item.label}</div>
+      `;
+      option.addEventListener('click', (e) => {
+        e.stopPropagation();
+        console.log('Selected:', item.value);
+
+        // Fire custom event
+        const event = new CustomEvent('optionSelected', { detail: item });
+        optionsBtnNode.dispatchEvent(event);
+
+        // Run the individual logic
+        if (typeof item.onSelect === 'function') item.onSelect();
+
+        closeDropdown();
+      });
+
+      dropdown.appendChild(option);
+    });
+
+    optionsBtnNode.insertAdjacentElement('afterend', dropdown);
+
+    // Attach outside click listener
+    setTimeout(() => {
+      window.addEventListener('click', handleClickOutside);
+    }, 0);
+  });
+}
+
+function removeElementsByTagAndClass(root, tagName, className) {
+  const elements = root.querySelectorAll(`${tagName}.${className}`);
+  elements.forEach(el => el.remove());
+}
+
+function removeZeroTranslate(element) {
+  const transform = element.style.transform;
+
+  if (!transform) return; // No inline transform set
+
+  const match = transform.match(/translate\(\s*(0(px)?|0%)\s*,\s*(0(px)?|0%)\s*\)/);
+
+  if (match) {
+    // Remove just the translate(...) part, preserve other transforms if any
+    const newTransform = transform.replace(match[0], '').trim();
+
+    if (newTransform === '') {
+      // No other transforms left, remove the whole property
+      element.style.removeProperty('transform');
+    } else {
+      // Update transform with remaining part
+      element.style.transform = newTransform;
+    } 
+  }
+}
+
+function createEditor(el){ 
+  let editor;
+  if (editorInstances?.has(el)) {
+    // Already has an editor, remove it and save HTML
+    editor = editorInstances.get(el);
+    const content = editor.getHTML();
+  } else {
+    removeElementsByTagAndClass(el, 'div', 'drag-btn');
+    removeElementsByTagAndClass(el, 'div', 'resize-btn');
+    removeElementsByTagAndClass(el, 'div', 'options-btn');
+    removeElementsByTagAndClass(el, 'div', 'custom-select-dropdown');
+    console.log('--here i am--', modalSpanContainer.children); console.log('CSS Text:', el.style.cssText);
+    
+    const span = document.createElement('span');
+    span.style.cssText = el.style.cssText;
+    span.innerHTML = el.innerHTML;
+    el.innerHTML = '';
+    el.appendChild(span);
+    modalSpanContainer.innerHTML = el.innerHTML;
+    console.log('--here 2 i am--', modalSpanContainer.innerHTML);
+    // Create new editor instance
+    editor = new RichTextEditor(modalSpanContainer);
+    editorInstances.set(modalSpanContainer, [editor, el]);
+
+    modal1.show();
+  }
+
+  /* on editor change */
+  setTimeout(() => { console.log('--editor--', editor);
+    const fontFamily = window.getComputedStyle(document.body).fontFamily;
+    editor.iframe.contentDocument.body.style.fontFamily = fontFamily;
+    editor.iframe.contentDocument.body.style.overflowY = 'scroll';
+    console.log('styles::',editor.iframe.contentDocument.body.style);
+  }, 50);
+  
+  /* on editor change */
+  document.querySelectorAll('.alterable.active').forEach(al => al.classList.remove('active'));
+}
+
+// Listen for clicks anywhere on the window
+/* window.addEventListener('click', function (event) {
+  // Loop through each editor instance in the map
+  editorInstances.forEach((editor, el) => {
+    // Check if the element does not have the class .richtexteditor
+    if (!el.classList.contains('richtexteditor')) {
+      const content = editor.getHTML();
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = content; 
+      const element = tempDiv.firstElementChild;
+      console.log('this element closed::', element.innerHTML);
+      modalSpanContainer.innerHTML = element.innerHTML;
+      el.innerHTML = element.innerHTML;
+      editor.delete();
+
+      const classesToRemove = [
+        'richtexteditor', 'rte-skin-default', 'rte-modern', 
+        'rte-toolbar-default', 'rte-desktop', 'rte-mobile'
+      ];
+      classesToRemove.forEach(cls => el.classList.remove(cls));
+
+      // Clear the editorInstances map
+      editorInstances.clear();
+    }
+  });
+
+}); */
+
+function disableTextSelection() {
+  document.body.style.userSelect = 'none';
+  document.body.style.webkitUserSelect = 'none';
+  document.body.style.msUserSelect = 'none';
+}
+
+function enableTextSelection() {
+  document.body.style.userSelect = '';
+  document.body.style.webkitUserSelect = '';
+  document.body.style.msUserSelect = '';
+}
+
+function enableDrag(target, handle) { console.log('drag-enabled-for::',target);
+  let offsetX = 0, offsetY = 0;
+  let startX = 0, startY = 0;
+
+  handle.addEventListener('mousedown', e => { 
+    e.stopPropagation();
+    document.body.style.overflow = 'hidden';
+    disableTextSelection();
+    target = findAlterableParent(e.target); console.log('mouse is down::',target);
+    let result = parseTranslate(target.style.transform);
+    if (Array.isArray(result)) {
+      [offsetX, offsetY] = result;
+      console.log('offsets in px:', offsetX, offsetY);
+    } else {
+      console.error('parseTranslate did not return an array:', result);
+    }
+    startX = e.clientX;
+    startY = e.clientY;
+
+    function onMouseMove(e) { console.log('mouse move::',target);
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      let newX = offsetX + dx;
+      let newY = offsetY + dy;
+
+      // Define custom offsets from each edge
+      const offsetLeft = -40;
+      const offsetTop = -200;
+      const offsetRight = 10;
+      const offsetBottom = 580;
+
+      // Calculate max X/Y considering all sides
+      const maxX = mainPage.clientWidth - target.offsetWidth - offsetRight;
+      const maxY = mainPage.clientHeight - target.offsetHeight - offsetBottom;
+
+      // Clamp within custom boundaries
+      newX = Math.max(offsetLeft, Math.min(newX, maxX));
+      newY = Math.max(offsetTop, Math.min(newY, maxY));
+      
+      target.style.transform = `translate(${newX}px, ${newY}px)`; console.log('in dara==',target.style.transform); console.log('sycon....',syncElements);
+      if(syncElements){
+        moveAndSync(target, newX, newY);
+      }
+
+      const qArea = target.closest('.QuestionArea');
+      const qIndex = Array.from(document.querySelectorAll('.QuestionArea')).indexOf(qArea);
+      const aIndex = Array.from(qArea.querySelectorAll('.alterable')).indexOf(target);
+      const qKey = `questionarea[${qIndex}]`;
+      const aKey = `alterable[${aIndex}]`;
+      const posStr = `translate(${newX}px, ${newY}px)`;
+      console.log('dragged alterable::',aKey);
+      // ✅ Get current follow state
+      const followStateEl = target.querySelector('.follow-btn span:last-child');
+      let followState = 'on';
+      if(followStateEl != null){
+        followState = followStateEl ? followStateEl.textContent.trim() : 'off';
+      }
+      
+      // ✅ Save regardless of follow state
+      if (!savedPositions[currentPageSize]) savedPositions[currentPageSize] = {};
+      if (!savedPositions[currentPageSize][qKey]) savedPositions[currentPageSize][qKey] = {};
+
+      savedPositions[currentPageSize][qKey][aKey] = {
+        follow: followState,
+        transform: posStr
+      };
+
+      localStorage.setItem('savedPositions', JSON.stringify(savedPositions));
+    }
+
+    function onMouseUp() {
+      document.body.style.overflow = '';
+      enableTextSelection();
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    }
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+}
+
+function moveAndSync(target, x, y) {
+  // Ensure it's inside a .QuestionArea and is alterable
+  const insideQuestionArea = !!target.closest('.QuestionArea');
+  if (!insideQuestionArea || !target.classList.contains('alterable')) {
+    console.log('Target not inside .QuestionArea or not .alterable');
+    return;
+  }
+
+  // Get the tag name and text content to match similar elements
+  const tagName = target.tagName.toLowerCase();
+  const content = target.textContent.trim();
+
+  console.log(`Matching tag <${tagName}> with content: "${content}"`);
+
+  // Find all similar alterable elements inside .QuestionArea
+  const allMatching = Array.from(document.querySelectorAll(`.QuestionArea ${tagName}.alterable`))
+    .filter(el => el.textContent.trim() === content);
+
+  console.log(`Found ${allMatching.length} matching elements.`);
+
+  // Apply transform to all matches
+  allMatching.forEach((el, i) => {
+    el.style.transform = `translate(${x}px, ${y}px)`;
+    saveTransformToLocalStorage(el, x, y, i);
+  });
+}
+
+function saveTransformToLocalStorage(element, x, y) {
+  const allQAreas = Array.from(document.querySelectorAll('.QuestionArea'));
+  const qArea = element.closest('.QuestionArea');
+  const qIndex = allQAreas.indexOf(qArea);
+
+  const alterablesInQ = Array.from(qArea.querySelectorAll('.alterable'));
+  const aIndex = alterablesInQ.indexOf(element);
+
+  const qKey = `questionarea[${qIndex}]`;
+  const aKey = `alterable[${aIndex}]`;
+  const posStr = `translate(${x}px, ${y}px)`;
+
+  console.log(`Saving: ${qKey} => ${aKey}`);
+
+  // Get follow state
+  const followStateEl = element.querySelector('.follow-btn span:last-child');
+  let followState = 'on';
+  if (followStateEl != null) {
+    followState = followStateEl.textContent.trim();
+  }
+
+  // Save to structured localStorage object
+  if (!savedPositions[currentPageSize]) savedPositions[currentPageSize] = {};
+  if (!savedPositions[currentPageSize][qKey]) savedPositions[currentPageSize][qKey] = {};
+
+  savedPositions[currentPageSize][qKey][aKey] = {
+    follow: followState,
+    transform: posStr
+  };
+
+  localStorage.setItem('savedPositions', JSON.stringify(savedPositions));
+}
+
+// Helper: Build a localStorage key based on class and index
+function getElementStorageKey(element, index = null) {
+  const classList = Array.from(element.classList).filter(cls =>
+    cls !== 'parent' && cls !== 'alterable' && cls !== 'active'
+  );
+  const className = classList.join('_') || 'unnamed';
+  const idx = index !== null ? `_i${index}` : '';
+  return `drag_pos_${className}${idx}`;
+}
+
+
+function enableResize(target, handle) {
+  handle.addEventListener('mousedown', e => {
+    e.stopPropagation();
+    const startWidth = target.offsetWidth;
+    const startHeight = target.offsetHeight;
+    const startX = e.clientX;
+    const startY = e.clientY;
+
+    function onMouseMove(e) {
+      const newWidth = startWidth + (e.clientX - startX);
+      const newHeight = startHeight + (e.clientY - startY);
+      target.style.width = `${newWidth}px`;
+      target.style.height = `${newHeight}px`;
+    }
+
+    function onMouseUp() {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    }
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+}
+
+function applySavedPositions() {
+  const pageData = savedPositions[currentPageSize];
+  if (!pageData) return;
+
+  document.querySelectorAll('.QuestionArea').forEach((qArea, qIdx) => {
+    const qKey = `questionarea[${qIdx}]`;
+    if (!pageData[qKey]) return;
+
+    qArea.querySelectorAll('.alterable').forEach((altEl, aIdx) => {
+      const aKey = `alterable[${aIdx}]`;
+      const data = pageData[qKey][aKey];
+
+      if (data) {
+        // ✅ Only apply transform if follow is "on"
+        if (data.follow === 'on' && data.transform) { console.log('changedfor::',data);
+          altEl.style.transform = data.transform;
+        }
+      }
+
+    });
+  });
+}
+
+function applySavedFollowSetting(){
+  const pageData = savedPositions[currentPageSize];
+  if (!pageData) return;
+
+  document.querySelectorAll('.QuestionArea').forEach((qArea, qIdx) => {
+    const qKey = `questionarea[${qIdx}]`;
+    if (!pageData[qKey]) return;
+
+    qArea.querySelectorAll('.alterable').forEach((altEl, aIdx) => {
+      const aKey = `alterable[${aIdx}]`;
+      const data = pageData[qKey][aKey];
+
+      if (data) {
+        // ✅ Always apply follow state to the button
+        const followSpan = altEl.querySelector('.follow-btn span:last-child');
+        if (followSpan) { console.log('yes i am in--', data);
+          followSpan.textContent = data.follow;
+        }
+      }
+
+    });
+  });
+}
+
+function changePageWidth(type){
+  mainPage.style.width = type === 'a4' || type === 'letter' ? '70%' : '100%';
+}
+
+document.getElementById('pageSizeSelect').addEventListener('change', function () {
+  currentPageSize = this.value;
+  changePageWidth(currentPageSize);
+  applySavedPositions();
+});
+
+applySavedPositions();
+
+document.addEventListener('keydown', function (e) {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+    e.preventDefault();
+    return;
+  }
+});
+
+function initiateLabelsAndTools() {
+  document.querySelectorAll('.alterable.parent').forEach((el, index) => {
+    // Avoid duplicate follow-btn
+    if (!el.querySelector('.follow-btn')) {
+      const followDiv = document.createElement('div');
+      followDiv.className = 'follow-btn';
+      followDiv.id = 'followbtn';
+
+      const followSpanName = document.createElement('span');
+      followSpanName.textContent = 'follow : ';
+
+      const followSpanOnOff = document.createElement('span');
+      followSpanOnOff.textContent = 'on';
+
+      followDiv.appendChild(followSpanName);
+      followDiv.appendChild(followSpanOnOff);
+      el.appendChild(followDiv);
+    }
+
+    const followBtn = el.querySelector('.follow-btn');
+    const followSpanOnOff = followBtn.querySelector('span:last-child');
+
+    // Add click listener if not yet bound
+    if (!followBtn.dataset.bound) {
+      followBtn.addEventListener('click', () => {
+        const currentState = followSpanOnOff.textContent.trim();
+        const newState = currentState === 'on' ? 'off' : 'on';
+        followSpanOnOff.textContent = newState;
+
+        console.log(`alterable[${index}]: ${newState}`);
+
+        // Save follow + transform
+        const qArea = followBtn.closest('.QuestionArea');
+        const qIndex = Array.from(document.querySelectorAll('.QuestionArea')).indexOf(qArea);
+        const aIndex = Array.from(qArea.querySelectorAll('.alterable')).indexOf(el);
+        const qKey = `questionarea[${qIndex}]`;
+        const aKey = `alterable[${aIndex}]`;
+        const transform = el.style.transform || '';
+
+        if (!savedPositions[currentPageSize]) savedPositions[currentPageSize] = {};
+        if (!savedPositions[currentPageSize][qKey]) savedPositions[currentPageSize][qKey] = {};
+
+        savedPositions[currentPageSize][qKey][aKey] = {
+          follow: newState,
+          transform: transform
+        };
+
+        localStorage.setItem('savedPositions', JSON.stringify(savedPositions));
+
+        // Update toggle button label
+        updateFollowAllButtonLabel();
+      });
+
+      followBtn.dataset.bound = 'true'; // prevent double binding
+    }
+  });
+
+  // Initial label update
+  updateFollowAllButtonLabel();
+}
+
+function updateFollowAllButtonLabel() {
+  const followSpans = document.querySelectorAll('.follow-btn span:last-child');
+  const states = Array.from(followSpans).map(span => span.textContent.trim());
+
+  if (!toggleFollowBtn) return;
+
+  const allOff = states.length > 0 && states.every(state => state === 'off');
+  const anyOn = states.includes('on');
+
+  if (allOff) {
+    syncElements = true;
+    toggleFollowBtn.textContent = 'Turn Follow All On';
+  } else if (anyOn) {
+    syncElements = false;
+    toggleFollowBtn.textContent = 'Turn Follow All Off';
+  } else {
+    syncElements = true;
+    toggleFollowBtn.textContent = 'Toggle Follow On';
+  }
+}
+
+toggleFollowBtn.addEventListener('click', () => {
+  const alterables = document.querySelectorAll('.QuestionArea .alterable');
+
+  // Determine current button state via label
+  const currentText = toggleFollowBtn.textContent.trim();
+  let newState = 'on';
+  if (currentText === 'Toggle Follow On' || currentText === 'Turn Follow All On') {
+    newState = 'on';
+  } else if (currentText === 'Turn Follow All Off') {
+    newState = 'off';
+  }
+
+  localStorage.setItem('followToggleState', newState);
+
+  alterables.forEach(altEl => {
+    // ✅ Update follow text if element has a follow-btn span
+    const followSpan = altEl.querySelector('.follow-btn span:last-child');
+    if (followSpan) followSpan.textContent = newState;
+
+    // ✅ Update localStorage
+    const qArea = altEl.closest('.QuestionArea');
+    const qIndex = Array.from(document.querySelectorAll('.QuestionArea')).indexOf(qArea);
+    const aIndex = Array.from(qArea.querySelectorAll('.alterable')).indexOf(altEl);
+    const qKey = `questionarea[${qIndex}]`;
+    const aKey = `alterable[${aIndex}]`;
+    const transform = altEl.style.transform || '';
+
+    if (!savedPositions[currentPageSize]) savedPositions[currentPageSize] = {};
+    if (!savedPositions[currentPageSize][qKey]) savedPositions[currentPageSize][qKey] = {};
+    savedPositions[currentPageSize][qKey][aKey] = {
+      follow: newState,
+      transform
+    };
+  });
+
+  // ✅ Save to localStorage
+  localStorage.setItem('savedPositions', JSON.stringify(savedPositions));
+
+  // ✅ Toggle button label
+  if (newState === 'on') {
+    syncElements = false;
+    toggleFollowBtn.textContent = 'Turn Follow All Off';
+  } else {
+    syncElements = true;
+    toggleFollowBtn.textContent = 'Turn Follow All On';
+  }
+});
+
+const pageData = savedPositions[currentPageSize];
+// Get base transforms from the first .QuestionArea
+const baseTransforms = Array.from(questionAreas[0].querySelectorAll('.alterable')).map(el => {
+  const transform = el.style.transform;
+  const match = transform.match(/translate\(\s*(-?\d+\.?\d*)px,\s*(-?\d+\.?\d*)px\s*\)/);
+  if (match) {
+    return {
+      x: parseFloat(match[1]),
+      y: parseFloat(match[2])
+    };
+  }
+  return { x: 0, y: 0 };
+});
+
+// Loop through all subsequent .QuestionAreas (starting from index 1)
+/* questionAreas.forEach((qa, qIdx) => {
+  if (qIdx === 0) return; // Skip the first one
+
+  const alters = qa.querySelectorAll('.alterable');
+  alters.forEach((el, aIdx) => {
+    const base = baseTransforms[aIdx];
+    if (!base) return;
+
+    const qKey = `questionarea[${qIdx}]`;
+    const aKey = `alterable[${aIdx}]`;
+    const data = pageData?.[qKey]?.[aKey];
+
+    // ✅ Only apply transform if follow is ON
+    if (data?.follow != 'off') {
+      const newX = base.x;
+      const newY = base.y;
+
+      el.style.transform = `translate(${newX}px, ${newY}px)`;
+    }
+  });
+}); */
+
+/* pptx */
+// Function to remove elements based on class or id
+function removeElementsByClassOrId(parentElement, className, idName) {
+      // Remove by class
+      if (className) {
+        const elements = parentElement.getElementsByClassName(className);
+        for (let element of elements) {
+          element.remove();
+        }
+      }
+
+      // Remove by id
+      if (idName) {
+        const element = parentElement.getElementById(idName);
+        if (element) element.remove();
+      }
+    }
+
+    // Function to extract and process HTML to PPTX
+    /* function sendHtml() {
+      // Get the HTML content you want to send
+      const contentDiv = document.getElementById('mainPage');
+      const htmlContent = "<div>"+contentDiv.innerHTML+"</div>"; // Or contentDiv.outerHTML
+
+      const serverUrl = 'http://127.0.0.1:5000/generate-ppt'; // Use a relative URL if Flask serves the HTML
+
+      fetch(serverUrl, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json' // Indicate that we are sending JSON
+          },
+          // Send the HTML content as a JSON string in the body
+          body: JSON.stringify({ html_content: htmlContent })
+      })
+      .then(response => {
+          if (!response.ok) {
+              // Handle server errors (e.g., 400 Bad Request, 500 Internal Server Error)
+              const contentType = response.headers.get('Content-Type');
+              if (contentType && contentType.includes('application/json')) {
+                  // If the server sent a JSON error response
+                  return response.json().then(err => { throw new Error(err.error || 'Server error'); });
+              } else {
+                  // If the server sent a non-JSON error response (e.g., plain text)
+                  return response.text().then(text => { throw new Error('Server error: ' + response.status + ' ' + response.statusText + (text ? ': ' + text : '')); });
+              }
+          }
+          // If the response is OK (e.g., 200), the server should send the file directly as a Blob
+          return response.blob();
+      })
+      .then(blob => {
+          // Create a temporary URL for the received blob (the PPTX file data)
+          const url = window.URL.createObjectURL(blob);
+
+          // Create a temporary link element in the document
+          const a = document.createElement('a');
+          a.style.display = 'none'; // Hide the link
+          a.href = url; // Set the link's href to the temporary URL
+          a.download = 'generated_presentation.pptx'; // Specify the download filename for the browser
+
+          // Append the link to the body and programmatically click it to trigger the download
+          document.body.appendChild(a);
+          a.click();
+
+          // Clean up the temporary URL and link element
+          window.URL.revokeObjectURL(url); // Release the object URL
+          a.remove(); // Remove the link element from the DOM
+      })
+      .catch(error => {
+          console.error('Error generating PPTX:', error);
+          // Display an error message to the user
+          alert('Error generating PPTX: ' + error.message);
+      });
+    } */
+
+async function generatePPT() {
+  function rgbToHex(color) {
+    if (typeof color !== 'string') return '';
+
+    if (color.startsWith('rgb')) {
+      const result = color.match(/\d+/g);
+      if (!result || result.length < 3) return color.toLowerCase(); // fallback to original lowercase
+
+      const r = parseInt(result[0]).toString(16).padStart(2, '0');
+      const g = parseInt(result[1]).toString(16).padStart(2, '0');
+      const b = parseInt(result[2]).toString(16).padStart(2, '0');
+
+      return `${r}${g}${b}`;
+    }
+
+    // Fallback: strip # and return lowercase
+    return color.replace(/^#/, '').toLowerCase();
+  }
+
+  function getRelativePositionInchesForPPT(element, referenceElement, offsetx = 0.00, offsety = 0.00) {
+    // Ensure both inputs are valid DOM element nodes
+    if (!element || element.nodeType !== Node.ELEMENT_NODE) {
+        console.error("Invalid element provided to getRelativePositionInchesForPPT (element).");
+        return null;
+    }
+     if (!referenceElement || referenceElement.nodeType !== Node.ELEMENT_NODE) {
+        console.error("Invalid reference element provided to getRelativePositionInchesForPPT (referenceElement).");
+        return null;
+    }
+
+    // --- Step 1: Get the bounding rectangles of both elements ---
+    // getBoundingClientRect() gives position relative to the viewport.
+    const elementRect = element.getBoundingClientRect();
+    const referenceRect = referenceElement.getBoundingClientRect();
+
+    // --- Step 2: Calculate the position of the element relative to the reference element ---
+    // Subtract the reference element's top/left from the element's top/left.
+    // This position is relative to the top-left corner of the reference element's border box,
+    // as seen in the viewport.
+    const relativePosX_pixels = elementRect.left - referenceRect.left;
+    const relativePosY_pixels = elementRect.top - referenceRect.top;
+
+    // --- Step 3: Determine the pixel-to-inch conversion factor ---
+    // We create a temporary element, style it with a known size in inches,
+    // and measure its size in pixels. This is an ESTIMATE.
+    let pixelsPerInch = 96; // Default standard DPI for CSS pixels
+
+    const tempDiv = document.createElement('div');
+    // Style the temporary div to be 1 inch wide, position it off-screen, and hide it.
+    tempDiv.style.cssText = 'width: 1in; position: absolute; left: -1000px; top: -1000px; visibility: hidden;';
+    document.body.appendChild(tempDiv);
+
+    // Measure the width of the 1-inch div in pixels
+    const tempRect = tempDiv.getBoundingClientRect();
+    const tempWidth = tempRect.width;
+
+    // Update the pixelsPerInch if the measurement is valid
+    if (tempWidth > 0) {
+        pixelsPerInch = tempWidth;
+    }
+
+    // Clean up the temporary element
+    document.body.removeChild(tempDiv);
+
+    // --- Step 4: Convert relative pixel position to inches ---
+    const relativePosX_inches = relativePosX_pixels / pixelsPerInch;
+    const relativePosY_inches = relativePosY_pixels / pixelsPerInch;
+
+    // --- Step 5: Apply custom offset and fallback for PPT layout ---
+    const finalPosY_inches = (relativePosY_inches + 0) || 0.5;
+    const finalPosX_inches = (relativePosX_inches + 0) || 0.5;
+
+    // Return the relative position in inches with custom adjustments
+    return {
+        y: finalPosY_inches+offsety,
+        x: finalPosX_inches+offsetx
+    };
+}
+
+function getComputedDimensionsInches(element, offsetW = 0.00, offsetH = 0.00) {
+    // Ensure the input is a valid DOM element node
+    if (!element || element.nodeType !== Node.ELEMENT_NODE) {
+        console.error("Invalid element provided to getComputedDimensionsInches.");
+        return null;
+    }
+
+    // --- Step 1: Get the element's computed width and height in pixels ---
+    // getBoundingClientRect() gives the rendered size of the element,
+    // including padding and border, in pixels relative to the viewport.
+    const rect = element.getBoundingClientRect();
+
+    const width_pixels = rect.width;
+    const height_pixels = rect.height;
+
+    // --- Step 2: Determine the pixel-to-inch conversion factor ---
+    // We create a temporary element, style it with a known size in inches,
+    // and measure its size in pixels. This is an ESTIMATE.
+    let pixelsPerInch = 96; // Default standard DPI for CSS pixels
+
+    // Create a temporary div element
+    const tempDiv = document.createElement('div');
+    // Style it to be 1 inch wide, position it off-screen, and hide it.
+    // This allows us to measure what 1 inch translates to in pixels in the current environment.
+    tempDiv.style.cssText = 'width: 1in; position: absolute; left: -1000px; top: -1000px; visibility: hidden;';
+    // Append the temporary div to the document body
+    document.body.appendChild(tempDiv);
+
+    // Measure the width of the 1-inch div in pixels
+    const tempRect = tempDiv.getBoundingClientRect();
+    const tempWidth = tempRect.width;
+
+    // Update the pixelsPerInch if the measurement is valid (greater than 0)
+    if (tempWidth > 0) {
+        pixelsPerInch = tempWidth;
+    }
+
+    // Clean up the temporary element by removing it from the document body
+    document.body.removeChild(tempDiv);
+
+    // --- Step 3: Convert pixel dimensions to inches ---
+    const width_inches = width_pixels / pixelsPerInch + offsetW;
+    const height_inches = height_pixels / pixelsPerInch + offsetH;
+
+    // Return the dimensions in inches
+    // Returning raw numbers, let the caller decide on rounding/formatting
+    return {
+        w: width_inches+2.4 || '50%',
+        h: height_inches || '50%'
+    };
+}
+
+  function getOriginalInlineStyleString(propertyName, element) {
+      // Ensure the input is a valid element node
+      if (!element || element.nodeType !== Node.ELEMENT_NODE) {
+          console.warn("Invalid element provided to getOriginalInlineStyleString.");
+          return false; // Return false for invalid input
+      }
+
+      // Get the raw 'style' attribute value as a string
+      const styleAttribute = element.getAttribute('style');
+
+      // If the style attribute is null or empty, the property is not set inline
+      if (!styleAttribute) {
+          return false;
+      }
+
+      // Normalize the requested property name to lowercase kebab-case for comparison
+      const normalizedPropertyName = propertyName.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase();
+
+      // Split the style attribute string into individual declarations
+      // Filter out empty strings from splitting (e.g., if the string ends with a semicolon)
+      const declarations = styleAttribute.split(';').filter(declaration => declaration.trim() !== '');
+
+      // Iterate through each declaration
+      for (const declaration of declarations) {
+          // Find the first colon to split property name and value
+          const colonIndex = declaration.indexOf(':');
+
+          // Ensure a colon exists and there's content before and after it
+          if (colonIndex > 0 && colonIndex < declaration.length - 1) {
+              const propName = declaration.substring(0, colonIndex).trim().toLowerCase();
+              const propValue = declaration.substring(colonIndex + 1).trim();
+
+              // Check if the current property name matches the requested one
+              if (propName === normalizedPropertyName) {
+                  return propValue; // Return the original value string
+              }
+          }
+      }
+
+      // If the loop finishes without finding the property, it's not set inline
+      return false;
+  }
+
+  function extractVisibleTextWithRefinedLabels() {
+    // Select all elements with the class 'QuestionArea'
+    const questionAreas = document.querySelectorAll('.QuestionArea');
+    const allGroupsData = []; // Array to store data for all groups
+    let slideGroup = [];
+
+    // Helper to check if an element has display: none
+    const isDisplayNone = el => {
+        if (!el || el.nodeType !== Node.ELEMENT_NODE) return false; // Ensure it's an element
+        const computedStyle = getComputedStyle(el);
+        return computedStyle.display === 'none';
+    };
+
+    // Helper to get text content, handling labels specifically
+    const getElementText = (element) => {
+        let text = '';
+        if (element.tagName.toLowerCase() === 'label') {
+            // For labels, get text content only from direct text nodes
+            element.childNodes.forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    text += node.nodeValue;
+                }
+            });
+        } else {
+            // For other elements, use innerText (which includes descendant text)
+            text = element.innerText;
+        }
+        return text.trim().replace(/\s+/g, ' '); // Trim and clean whitespace
+    };
+
+    // Iterate over each QuestionArea element
+    questionAreas.forEach((questionArea, index) => {
+        // Create a group object for the current QuestionArea
+        const group = {
+            id: `Group ${index + 1}`, // Assign a unique ID based on index
+            elements: [] // Array to store the extracted elements for this group
+        };
+        slideGroup.push([index]);
+
+        // Select all span and label elements that are descendants of .parent within the current QuestionArea
+        // This selects all target elements regardless of their specific parent .parent div
+        const targetElements = questionArea.querySelectorAll('.parent span, .parent label');
+
+        // Iterate over the found elements in document order
+        targetElements.forEach(element => {
+            // Check if the element has display: none
+            if (!isDisplayNone(element)) {
+                // Get the text content using the helper function
+                const text = getElementText(element);
+                let fontsize = '10px';
+                let fweight = false;
+                let color = '000000';
+                var {x, y} = getRelativePositionInchesForPPT(element, questionArea);
+                var {w, h} = getComputedDimensionsInches(element);
+                
+                if(getOriginalInlineStyleString('font-weight', element) == 600 || getOriginalInlineStyleString('font-weight', element) == 700 || getOriginalInlineStyleString('font-weight', element) == 800 || getOriginalInlineStyleString('font-weight', element) == 900){
+                  fweight = true;
+                }
+                if(getOriginalInlineStyleString('font-size', element)){
+                  fontsize = getOriginalInlineStyleString('font-size', element);
+                }
+                if(getOriginalInlineStyleString('color', element)){ 
+                  color =  rgbToHex(getOriginalInlineStyleString('color', element));
+                }
+
+                if(element.classList.contains('lng_english')){
+                var {x, y} = getRelativePositionInchesForPPT(element, questionArea, 0.7);
+                var {w, h} = getComputedDimensionsInches(element, -2.5);
+                fontsize = parseInt(fontsize)-8;
+                }
+                if(element.classList.contains('lng_hindi')){
+                var {x, y} = getRelativePositionInchesForPPT(element, questionArea, 0.5);
+                var {w, h} = getComputedDimensionsInches(element, -2.5);
+                fontsize = parseInt(fontsize)-8;
+                } 
+                if(element.classList.contains('in_serial')){
+                  var {x, y} = getRelativePositionInchesForPPT(element, questionArea, 0.5);
+                  fontsize = parseInt(fontsize)-3;
+                } 
+                if(element.classList.contains('optionPosition')){
+                var {x, y} = getRelativePositionInchesForPPT(element, questionArea, 0.1, 0.06);
+                fontsize = parseInt(fontsize)-8;
+                }
+                if(element.classList.contains('o_index')){
+                fontsize = parseInt(fontsize)-8;
+                } 
+                if(element.classList.contains('q_index')){
+                var {x, y} = getRelativePositionInchesForPPT(element, questionArea, 0, 0.04);
+                fontsize = parseInt(fontsize)-8;
+                }
+                if(element.classList.contains('option_both_slash')){
+                var {x, y} = getRelativePositionInchesForPPT(element, questionArea, 0.10, 0.05);
+                }
+
+                // Add the element data to the current group's elements array
+                // Only add if there is some text content after cleaning
+                if (text) {
+                     group.elements.push({
+                        parent: element.tagName.toLowerCase(), // 'span' or 'label'
+                        text: text, // The extracted text content
+                        options: 
+                        {
+                          fontSize: parseInt(fontsize), 
+                          color:color, 
+                          x: x, 
+                          y: y
+                        }
+                    });
+
+                    slideGroup[index].push({
+                      text: text,
+                      fontSize: parseInt(fontsize), 
+                      color:color, 
+                      bold: fweight,
+                      x: x, 
+                      y: y,
+                      w: w,
+                      h: h
+                    });
+                }
+            }
+        });
+
+        // Add the completed group data to the main results array
+        allGroupsData.push(group);
+    });
+
+    // Return the final array of group objects
+    return slideGroup;
+}
+
+// Example of how to run the function and log the output:
+const result = extractVisibleTextWithRefinedLabels();
+console.log(JSON.stringify(result, null, 2));
+
+const pptx = new PptxGenJS();
+// Generate slides
+result.forEach((group, index) => {
+        const slide = pptx.addSlide();
+
+        group.forEach(item => {
+          slide.addText(item.text, {
+            x: item.x,
+            y: item.y,
+            w: item.w,
+            h: item.h,
+            bold: item.bold,
+            fontSize: item.fontSize,
+            color: item.color,
+            fontFace: 'Arial'
+          });
+        });
+      });
+
+  pptx.writeFile("GroupedTextSlides.pptx");
+
+} 
+
+// Include all helper functions (toPptxColor, pxToPt, pxToInches, parseTranslate, buildTextRuns)
+// here before the generatePPT function.
+
+/* pptx */
+</script>
+
+<!-- other options -->
+ <script>
+  $(document).ready(function () {
+    $('.btn-toggle').click(function(){
+      $(this).toggleClass("active"); 
+    });
+
+    $('#resetbtn').click(function(){
+      if(localStorage?.getItem('savedPositions')){
+        localStorage.removeItem('savedPositions');
+        location.reload(true);
+      }
+    });
+
+    $(".AddQuestionNO").click(function () {
+      $(this).toggleClass("active"); 
+      let elements = document.getElementsByClassName("changeQNo");
+	    for(let i = 0; i < elements.length; i++) {
+	      elements[i].style.display = (elements[i].style.display === "none") ? "inline" : "none";
+	    }
+    });
+
+    $(".changeLanguage").click(function () {
+    	let type=$(this).data('type');
+    	let lng=$(this).data('lng');
+      $(".changeLanguage").removeClass("active"); 
+      $(this).addClass("active"); 
+      var hindi            =document.getElementsByClassName("lng_hindi");
+	    var english          =document.getElementsByClassName("lng_english");
+	    var qoption_hindi    =document.getElementsByClassName("qoption_hindi");
+	    var qoption_english  =document.getElementsByClassName("qoption_english");
+	    var option_both_slash=document.getElementsByClassName("option_both_slash");
+
+	    if(type=='question'){
+	      if(lng=='hindi'){
+			    for(var i = 0; i < hindi.length; ++i) {
+				    var item1 = hindi[i];  
+				    var item2 = english[i];  
+				    item1.style.display="inline";
+				    item2.style.display="none";
+				  }
+				}
+
+				if(lng=='english'){
+			    for(var i = 0; i < hindi.length; ++i) {
+				    var item1 = hindi[i];  
+				    var item2 = english[i];  
+				    item1.style.display="none";
+				    item2.style.display="inline";
+				  }
+				}
+
+				if(lng=='both'){
+			    for(var i = 0; i < hindi.length; ++i) {
+				    var item1 = hindi[i];  
+				    var item2 = english[i];  
+				    item1.style.display="inline";
+				    item2.style.display="inline";
+				  }
+				}
+	    }
+
+	    if(type=='option'){
+	    	if(lng=='hindi'){
+			    for(var i = 0; i < qoption_hindi.length; ++i) {
+				    var item1 = qoption_hindi[i];  
+				    var item2 = qoption_english[i];
+				    var item3 = option_both_slash[i];  
+				    item1.style.display="inline";
+				    item2.style.display="none";
+				    item3.style.display="none";
+				  }
+				}
+
+				if(lng=='english'){
+			    for(var i = 0; i < qoption_hindi.length; ++i) {
+				    var item1 = qoption_hindi[i];  
+				    var item2 = qoption_english[i];
+				    var item3 = option_both_slash[i];   
+				    item1.style.display="none";
+				    item2.style.display="inline";
+				    item3.style.display="none";
+				  }
+				}
+
+				if(lng=='both'){
+			    for(var i = 0; i < qoption_hindi.length; ++i) {
+				    var item1 = qoption_hindi[i];  
+				    var item2 = qoption_english[i];  
+				    var item3 = option_both_slash[i];
+					if(item1?.style){
+						item1.style.display="inline";
+					}
+					if(item2?.style){
+						item2.style.display="inline";
+					}
+					if(item3?.style){
+						item3.style.display="inline";
+					}
+				  }
+				}
+	    }
+    });
+
+    $('.switchPosition').on('click', function () {
+      // Check if toolbar currently has order-1
+      const toolbarHasOrder1 = $('#toolbararea').hasClass('order-1');
+
+      if (toolbarHasOrder1) {
+        $('#toolbararea').removeClass('order-1').addClass('order-2');
+        $('#mainPage').removeClass('order-2').addClass('order-1');
+      } else {
+        $('#toolbararea').removeClass('order-2').addClass('order-1');
+        $('#mainPage').removeClass('order-1').addClass('order-2');
+      }
+    });
+
+    /* switch questions lang */
+	$('.switchQuestionsLang').on('click', function () {
+		$('.QuestionArea > div').each(function () {
+			const $parent = $(this);
+
+			// Swap main question title
+			const $englishQ = $parent.find('.lng_english').first();
+			const $hindiQ = $parent.find('.lng_hindi').first();
+
+			if ($englishQ.length && $hindiQ.length) {
+			if ($englishQ.index() < $hindiQ.index()) {
+				$englishQ.insertAfter($hindiQ);
+			} else {
+				$hindiQ.insertAfter($englishQ);
+			}
+			}
+
+			// Swap each answer option row
+			$parent.find('div[style*="display:inline-flex"]').each(function () {
+			const $row = $(this);
+			const $eng = $row.find('.qoption_english');
+			const $hin = $row.find('.qoption_hindi');
+			const $slash = $row.find('.option_both_slash');
+
+			// All three must exist
+			if ($eng.length && $hin.length && $slash.length) {
+				const engIndex = $eng.index();
+				const hinIndex = $hin.index();
+
+				if (hinIndex < engIndex) {
+				// Order: hindi, slash, english → swap to english, slash, hindi
+				$eng.insertBefore($slash);
+				$hin.insertAfter($slash);
+				} else {
+				// Order: english, slash, hindi → swap to hindi, slash, english
+				$hin.insertBefore($slash);
+				$eng.insertAfter($slash);
+				}
+			}
+			});
+		});
+	});
+	/* switch questions lang */
+
+  $(".changeWidth").on("change",function () {
+    $("#mainPage").css("width",$(this).val()+"%")
+  });
+
+  });
+ </script>
+<!-- other options -->
+
+</body>
+</html>
