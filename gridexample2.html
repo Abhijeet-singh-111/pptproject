@@ -56,7 +56,8 @@
   </div>
 
   <!-- content area -->
-  <div class="rightarea order-2" id="mainPage" style="width: 100%; margin: auto;">
+  <div class="rightarea order-2" style="width: 100%;">
+  <div id="mainPage">
     <div class="QuestionArea">
       <div style="float:right;width:100%;" id="container">
         <div style="float:left;width:95%;border:solid 4px white;padding:4px;">
@@ -145,6 +146,7 @@
       </div>
     </div>
   </div>
+  </div>
   <!-- content area -->
 </div> 
 
@@ -207,10 +209,9 @@ modal1.modalEl.addEventListener('modal.hidden', (event) => {
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = content; 
         const element = tempDiv.firstElementChild;
-        console.log('this element closed::', tempDiv.innerHTML);
+        console.log('this element closed::', element.innerHTML);
         el.innerHTML = element.innerHTML;
-        editor.delete();
-
+        
         const classesToRemove = [
           'richtexteditor', 'rte-skin-default', 'rte-modern', 
           'rte-toolbar-default', 'rte-desktop', 'rte-mobile'
@@ -218,7 +219,9 @@ modal1.modalEl.addEventListener('modal.hidden', (event) => {
         classesToRemove.forEach(cls => edicontent.classList.remove(cls));
         modalSpanContainer.innerHTML = '';
         // Clear the editorInstances map
+        editor.delete();
         editorInstances.clear();
+        
       }
     });
 
@@ -1454,10 +1457,10 @@ result.forEach((group, index) => {
 
       if (toolbarHasOrder1) {
         $('#toolbararea').removeClass('order-1').addClass('order-2');
-        $('#mainPage').removeClass('order-2').addClass('order-1');
+        $('.rightarea').removeClass('order-2').addClass('order-1');
       } else {
         $('#toolbararea').removeClass('order-2').addClass('order-1');
-        $('#mainPage').removeClass('order-1').addClass('order-2');
+        $('.rightarea').removeClass('order-1').addClass('order-2');
       }
     });
 
@@ -1506,7 +1509,7 @@ result.forEach((group, index) => {
 	/* switch questions lang */
 
   $(".changeWidth").on("change",function () {
-    $("#mainPage").css("width",$(this).val()+"%")
+    $(".rightarea").css("width",$(this).val()+"%")
   });
 
   });
