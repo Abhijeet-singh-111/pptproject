@@ -29,6 +29,10 @@ rte-bottom {
     font-size: 14px;
 }
 
+.richtexteditor iframe{
+    min-height: 350px !important;
+}
+
     .richtexteditor *, .rte-absolute *, .rte-fixed * {
         box-sizing: border-box !important;
     }

@@ -10,7 +10,9 @@
 </head>
 <body>
 
+<style id="dynamicPageStyle">
 
+</style>
 <div id="container" class="wrapper">
   <div id="toolbararea" class="optionsArea order-1">
     <div class="content">
@@ -46,6 +48,7 @@
           <option value="none" selected>--Select--</option>
           <option value="a4">A4</option>
           <option value="letter">Letter</option>
+          <option value="1080">1080</option>
         </select>
         <button style="margin: 0 3px;" onclick="window.print()" class="noprint">🖨️ Print</button>
       </div>
@@ -187,6 +190,7 @@ let modalSpanContainer = document.getElementById('modalSpanContainer');
 let editAll = document.getElementById('editall');
 
 const selectPageSize = document.getElementById('pageSizeSelect');
+let dynamicPageStyle = document.getElementById('dynamicPageStyle');
 
 let editorInstances = new Map();
 let backupTransform = null;
@@ -254,6 +258,54 @@ editAll.addEventListener('click', function(){
   createEditor(mainPage);
 });
 
+function applyMainPageStyle() {
+  const savedStyle = localStorage.getItem('mainPageStyle');
+  if (savedStyle) {
+    mainPage.style.cssText = savedStyle;
+  }
+}
+
+function applyPrintSize(){
+  if(localStorage?.getItem('pageSize')){
+    let type = localStorage.getItem('pageSize');
+    let size;
+    if(type === 'a4'){
+      size = type.toUpperCase();
+      dynamicPageStyle.textContent = `
+        @media print {
+          @page {
+            size: ${size};
+            margin: 1in;
+          }
+        }
+      `;
+    }
+    else if(type === 'letter'){
+      size = type;
+      dynamicPageStyle.textContent = `
+        @media print {
+          @page {
+            size: ${size};
+            margin: 1in;
+          }
+        }
+      `;
+    } 
+    else if(type === '1080'){
+      dynamicPageStyle.textContent = `
+        @media print {
+          @page {
+            size: 1920px 1080px;
+            margin: 1in;
+          }
+        }
+      `;
+    } else {
+      dynamicPageStyle.textContent = ``;
+    }
+  }
+}
+
 // Save scroll position before page unload
 window.addEventListener('beforeunload', () => {
   localStorage.setItem('scrollPosition', window.scrollY);
@@ -269,6 +321,9 @@ window.addEventListener('DOMContentLoaded', () => {
   if (scrollY !== null) {
     window.scrollTo(0, parseInt(scrollY));
   }
+
+  /* applyMainPageStyle(); */
+  applyPrintSize();
 
   const savedToggleState = localStorage.getItem('followToggleState') || 'on'; // default to 'on'
   if (savedToggleState === 'on') {
@@ -490,11 +545,12 @@ function createEditor(el){
   }
 
   /* on editor change */
+  
   setTimeout(() => { console.log('--editor--', editor);
     const fontFamily = window.getComputedStyle(document.body).fontFamily;
     editor.iframe.contentDocument.body.style.fontFamily = fontFamily;
     editor.iframe.contentDocument.body.style.overflowY = 'scroll';
-    editor.iframe.style.minHeight = '350px';
+    editor.iframe.style.minHeight = '350px !important';
     console.log('styles::',editor.iframe.contentDocument.body.style);
   }, 50);
   
@@ -694,7 +750,6 @@ function getElementStorageKey(element, index = null) {
   return `drag_pos_${className}${idx}`;
 }
 
-
 function enableResize(target, handle) {
   handle.addEventListener('mousedown', e => {
     e.stopPropagation();
@@ -767,8 +822,21 @@ function applySavedFollowSetting(){
   });
 }
 
-function changePageWidth(type){
-  mainPage.style.width = type === 'a4' || type === 'letter' ? '70%' : '100%';
+function saveMainPageStyle() {
+  localStorage.setItem('mainPageStyle', mainPage.style.cssText);
+}
+
+function changePageWidth(type){ console.log('type::',type);
+  if(type === 'a4' || type === 'letter'){
+    mainPage.style.width = '70%';
+    mainPage.style?.removeProperty('height');
+  } else if(type === '1080'){
+    mainPage.style.height = '1920px';
+    mainPage.style.width = '1080px';
+  } else {
+    mainPage.style.width = '100%';
+    mainPage.style?.removeProperty('height');
+  }
 }
 
 document.getElementById('pageSizeSelect').addEventListener('change', function () {
@@ -776,7 +844,11 @@ document.getElementById('pageSizeSelect').addEventListener('change', function ()
   localStorage.setItem('pageSize', currentPageSize);
   changePageWidth(currentPageSize);
   applySavedPositions();
-  location.reload(true);
+  saveMainPageStyle();
+
+  setTimeout(() => {
+    location.reload(true);
+  }, 10);
 });
 
 applySavedPositions();
@@ -1377,14 +1449,22 @@ result.forEach((group, index) => {
     $('#resetbtn').click(function(){
       if(localStorage?.getItem('savedPositions')){
         localStorage.removeItem('savedPositions');
-        if(localStorage?.getItem('pageSize')){
-          localStorage.removeItem('pageSize');
-        }
-        if(localStorage?.getItem('scrollPosition')){
-          localStorage.removeItem('scrollPosition');
-        }
-        location.reload(true);
       }
+      if(localStorage?.getItem('pageSize')){
+        localStorage.removeItem('pageSize');
+      }
+      if(localStorage?.getItem('scrollPosition')){
+        localStorage.removeItem('scrollPosition');
+      }
+      if(localStorage?.getItem('mainPageStyle')){
+        localStorage.removeItem('mainPageStyle');
+      } 
+      if(localStorage?.getItem('followToggleState')){
+        localStorage.removeItem('followToggleState');
+      } 
+
+      dynamicPageStyle.textContent = ``;
+      location.reload(true);
     });
 
     $(".AddQuestionNO").click(function () {
