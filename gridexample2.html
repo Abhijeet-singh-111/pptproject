@@ -59,7 +59,7 @@
   <div class="rightarea order-2" style="width: 100%;">
   <div id="mainPage">
     <div class="QuestionArea">
-      <div style="float:right;width:100%;" id="container">
+      <div style="width:100%;" id="container">
         <div style="float:left;width:95%;border:solid 4px white;padding:4px;">
           <div class="alterable parent" style="transform: translate(0px, 0px); text-wrap: wrap;">
             <label class="alterable q_index" style="color: #ff0000;font-size:30px;font-weight:600;">Q. <span class="changeQNo q_index" style="display:none;color: #ff0000;font-size:30px;font-weight:600;">1</span></label>&nbsp;
@@ -103,7 +103,7 @@
     </div>
     <br/>
     <div class="QuestionArea">
-      <div style="float:right;width:100%;" id="container">
+      <div style="width:100%;" id="container">
         <div style="float:left;width:95%;border:solid 4px white;padding:4px;">
           <div class="alterable parent" style="transform: translate(0px, 0px); text-wrap: wrap;">
             <label class="alterable q_index" style="color: #ff0000;font-size:30px;font-weight:600;">Q. <span class="changeQNo q_index" style="display:none;color: #ff0000;font-size:30px;font-weight:600;">1</span></label>&nbsp;
@@ -186,6 +186,8 @@ const body = document.querySelector('body');
 let modalSpanContainer = document.getElementById('modalSpanContainer');
 let editAll = document.getElementById('editall');
 
+const selectPageSize = document.getElementById('pageSizeSelect');
+
 let editorInstances = new Map();
 let backupTransform = null;
 let originalTextContent;
@@ -252,7 +254,22 @@ editAll.addEventListener('click', function(){
   createEditor(mainPage);
 });
 
+// Save scroll position before page unload
+window.addEventListener('beforeunload', () => {
+  localStorage.setItem('scrollPosition', window.scrollY);
+});
+
 window.addEventListener('DOMContentLoaded', () => {
+  const savedPageValue = localStorage.getItem('pageSize');
+  if (savedPageValue) {
+    selectPageSize.value = savedPageValue;
+  }
+
+  const scrollY = localStorage.getItem('scrollPosition');
+  if (scrollY !== null) {
+    window.scrollTo(0, parseInt(scrollY));
+  }
+
   const savedToggleState = localStorage.getItem('followToggleState') || 'on'; // default to 'on'
   if (savedToggleState === 'on') {
     syncElements = false;
@@ -477,6 +494,7 @@ function createEditor(el){
     const fontFamily = window.getComputedStyle(document.body).fontFamily;
     editor.iframe.contentDocument.body.style.fontFamily = fontFamily;
     editor.iframe.contentDocument.body.style.overflowY = 'scroll';
+    editor.iframe.style.minHeight = '350px';
     console.log('styles::',editor.iframe.contentDocument.body.style);
   }, 50);
   
@@ -755,8 +773,10 @@ function changePageWidth(type){
 
 document.getElementById('pageSizeSelect').addEventListener('change', function () {
   currentPageSize = this.value;
+  localStorage.setItem('pageSize', currentPageSize);
   changePageWidth(currentPageSize);
   applySavedPositions();
+  location.reload(true);
 });
 
 applySavedPositions();
@@ -1357,6 +1377,12 @@ result.forEach((group, index) => {
     $('#resetbtn').click(function(){
       if(localStorage?.getItem('savedPositions')){
         localStorage.removeItem('savedPositions');
+        if(localStorage?.getItem('pageSize')){
+          localStorage.removeItem('pageSize');
+        }
+        if(localStorage?.getItem('scrollPosition')){
+          localStorage.removeItem('scrollPosition');
+        }
         location.reload(true);
       }
     });
@@ -1509,7 +1535,7 @@ result.forEach((group, index) => {
 	/* switch questions lang */
 
   $(".changeWidth").on("change",function () {
-    $(".rightarea").css("width",$(this).val()+"%")
+    $(".QuestionArea #container").css("width",$(this).val()+"%")
   });
 
   });
