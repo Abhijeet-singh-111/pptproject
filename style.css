@@ -12,6 +12,28 @@ body {
     background: #ffffff;
 }
 
+.image-wrapper {
+    position: absolute;
+    top: 100px;
+    left: 100px;
+    display: inline-block;
+    border: 2px solid transparent;
+    cursor: move;
+}
+
+.image-wrapper.selected {
+    border: 2px dashed #2196F3;
+}
+
+.image-wrapper img {
+    display: block;
+    width: 200px;
+    height: auto;
+    user-select: none;
+    pointer-events: none;
+    max-width: none;
+}
+
 *::-webkit-scrollbar-track
 {
 	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
@@ -153,7 +175,7 @@ li{
 }
 
 .alterable.active .drag-btn,
-.alterable.active .resize-btn, .alterable.active .options-btn, .alterable.parent.active .follow-btn {
+.alterable.active .resize-btn, .alterable.active .options-btn, .alterable.parent.active .follow-btn,.selected .resize-btn {
     display: block;
 }
 

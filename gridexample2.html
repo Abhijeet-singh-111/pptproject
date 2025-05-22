@@ -10,6 +10,16 @@
 </head>
 <body>
 
+<style>
+  @media print{
+    .alterable.active{
+    border: none;
+    }
+    .drag-btn, .resize-btn, .options-btn, .selected{
+    display: none;
+    }
+  }
+</style>
 <style id="dynamicPageStyle">
 
 </style>
@@ -48,9 +58,9 @@
           <option value="none" selected>--Select--</option>
           <option value="a4">A4</option>
           <option value="letter">Letter</option>
-          <option value="1080">1080</option>
+          <option value="1920">1920</option>
         </select>
-        <button style="margin: 0 3px;" onclick="window.print()" class="noprint">🖨️ Print</button>
+        <button style="margin: 0 3px;" onclick="printthis()" class="noprint">🖨️ Print</button>
       </div>
       
       <div id="status"></div>
@@ -64,7 +74,7 @@
     <div class="QuestionArea">
       <div style="width:100%;" id="container">
         <div style="float:left;width:95%;border:solid 4px white;padding:4px;">
-          <div class="alterable parent" style="transform: translate(0px, 0px); text-wrap: wrap;">
+          <div class="alterable parent" style="text-wrap: wrap;">
             <label class="alterable q_index" style="color: #ff0000;font-size:30px;font-weight:600;">Q. <span class="changeQNo q_index" style="display:none;color: #ff0000;font-size:30px;font-weight:600;">1</span></label>&nbsp;
             <span id="fullElement" class="lng_english" style="display:none;color: #0000ff !important;font-weight:600;font-size:30px;">
               11Find a quadratic polynomial whose sum and product of zeroes are 5, 7 respectively. </br></span>
@@ -108,7 +118,7 @@
     <div class="QuestionArea">
       <div style="width:100%;" id="container">
         <div style="float:left;width:95%;border:solid 4px white;padding:4px;">
-          <div class="alterable parent" style="transform: translate(0px, 0px); text-wrap: wrap;">
+          <div class="alterable parent" style="text-wrap: wrap;">
             <label class="alterable q_index" style="color: #ff0000;font-size:30px;font-weight:600;">Q. <span class="changeQNo q_index" style="display:none;color: #ff0000;font-size:30px;font-weight:600;">1</span></label>&nbsp;
             <span id="fullElement" class="lng_english" style="display:none;color: #0000ff !important;font-weight:600;font-size:30px;">
               11Find a quadratic polynomial whose sum and product of zeroes are 5, 7 respectively. </br></span>
@@ -196,6 +206,95 @@ let editorInstances = new Map();
 let backupTransform = null;
 let originalTextContent;
 
+/* for image */
+function imageExecution() { 
+  const wrapperImgs = document.querySelectorAll('#resizable-img');
+
+  wrapperImgs.forEach(wrapperimg => { console.log('in loop of image:::',wrapperimg)
+    const resizeBtnImg = wrapperimg.querySelector('.resize-btn');
+    const img = wrapperimg.querySelector('img');
+
+    let isIMGDragging = false;
+    let isIMGResizing = false;
+    let startX, startY, startWidth, startHeight, aspectRatio;
+    let offsetX, offsetY;
+
+    // Drag start
+    wrapperimg.addEventListener('mousedown', (e) => { console.log('here0');
+      if (e.target === resizeBtnImg) return; console.log('here1');
+      isIMGDragging = true;
+      isIMGResizing = false;
+      offsetX = e.clientX - wrapperimg.offsetLeft;
+      offsetY = e.clientY - wrapperimg.offsetTop;
+      wrapperimg.classList.add('selected');
+
+      document.querySelectorAll('.alterable.active').forEach(el => {
+        el.classList.remove('active');
+        removeZeroTranslate(el);
+      });
+    });
+
+    // Resize start
+    if (resizeBtnImg) {
+      resizeBtnImg.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        isIMGResizing = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = img.offsetWidth;
+        startHeight = img.offsetHeight;
+        aspectRatio = startWidth / startHeight;
+        wrapperimg.classList.add('selected');
+
+        document.querySelectorAll('.alterable.active').forEach(el => {
+          el.classList.remove('active');
+          removeZeroTranslate(el);
+        });
+      });
+    }
+
+    // Global mousemove
+    document.addEventListener('mousemove', (e) => {
+      if (isIMGDragging) {
+        wrapperimg.style.left = (e.clientX - offsetX) + 'px';
+        wrapperimg.style.top = (e.clientY - offsetY) + 'px';
+      }
+
+      if (isIMGResizing) {
+        const dx = e.clientX - startX;
+        const newWidth = startWidth + dx;
+        const newHeight = newWidth / aspectRatio;
+        img.style.width = newWidth + 'px';
+        img.style.height = newHeight + 'px';
+      }
+    });
+
+    // Stop all actions on mouseup
+    document.addEventListener('mouseup', () => {
+      isIMGDragging = false;
+      isIMGResizing = false;
+
+      document.querySelectorAll('.alterable.active').forEach(el => {
+        el.classList.remove('active');
+        removeZeroTranslate(el);
+      });
+    });
+
+    // Deselect on outside click
+    document.addEventListener('mousedown', (e) => {
+      if (!wrapperimg.contains(e.target)) {
+        wrapperimg.classList.remove('selected');
+      }
+
+      document.querySelectorAll('.alterable.active').forEach(el => {
+        el.classList.remove('active');
+        removeZeroTranslate(el);
+      });
+    });
+  });
+}
+/* for image */
+
 // Initialize modal with callbacks
 const myModal = document.getElementById('customModal1');
 const modal1 = new Modal(myModal);
@@ -208,28 +307,86 @@ modal1.modalEl.addEventListener('modal.hidden', (event) => {
   console.log(`Modal with ID ${event.detail.modalId} was hidden.`);
 
   // Loop through each editor instance in the map
-  editorInstances.forEach(([editor, el], edicontent) => { console.log('==in ittt:', el);
+  editorInstances.forEach(([editor, el], edicontent) => {
       // Check if the element does not have the class .richtexteditor
-      if (edicontent.classList.contains('richtexteditor')) { console.log('==in ittt 2', edicontent);
-        const content = editor.getHTML();
+      if (edicontent.classList.contains('richtexteditor')) {
+        const content = editor.getHTML(); 
+        console.log('content->',content)
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = content; 
-        const element = tempDiv.firstElementChild;
-        console.log('this element closed::', element.innerHTML);
-        el.innerHTML = element.innerHTML;
-        
+        tempDiv.querySelectorAll('img').forEach(img => {
+          let parent = img.parentElement;
+          if (parent && parent.tagName.toLowerCase() === 'div') {
+            parent.classList.add('image-wrapper');
+            parent.id = 'resizable-img';
+            let resizeImg = document.createElement('div');
+            resizeImg.className = 'resize-btn';
+            parent.appendChild(resizeImg);
+          }
+        });
+        let html = '';
+        for (let i = 1; i < tempDiv.children.length; i++) {
+            const child = tempDiv.children[i];
+            if(child?.children[0]?.tagName?.toLowerCase() === 'img'){
+              const questionArea = el.closest('.QuestionArea');
+              if (questionArea) {
+                  questionArea.appendChild(child);
+              }
+            } else {
+              html += child.outerHTML;
+            }
+            
+        } console.log('html->',html);
+        const element = tempDiv.firstElementChild.innerHTML+html;
+        console.log('this element closed::', element);
+        el.innerHTML = element;
         const classesToRemove = [
-          'richtexteditor', 'rte-skin-default', 'rte-modern', 
-          'rte-toolbar-default', 'rte-desktop', 'rte-mobile'
-        ];
+            'richtexteditor', 'rte-skin-default', 'rte-modern', 
+            'rte-toolbar-default', 'rte-desktop', 'rte-mobile'
+          ];
         classesToRemove.forEach(cls => edicontent.classList.remove(cls));
         modalSpanContainer.innerHTML = '';
-        // Clear the editorInstances map
-        editor.delete();
-        editorInstances.clear();
+        imageExecution();
+        safeDeleteEditor(el, editor);
+        /* setTimeout(() => {
+          // Clear the editorInstances map
+          editor.delete();
+          editorInstances.clear();
+        }, 100); */
+
+        setTimeout(() => {
+        document.querySelectorAll('.alterable').forEach(el => {
+          el?.classList?.remove('active');
+          removeZeroTranslate(el);
+        });
+        }, 10);
         
       }
     });
+
+    function safeDeleteEditor(el, editor) {
+      if (!editorInstances.has(el)) return;
+
+      try {
+        // Get content before deletion
+        const content = editor.getHTMLCode();
+
+        // Clear instance reference first to avoid re-use during cleanup
+        editorInstances.delete(el);
+
+        // Try to dispose in a delay to let async tasks (like file upload) complete
+        setTimeout(() => {
+          try {
+            editor.delete(); // or editor.dispose(); depending on your version
+            el.innerHTML = content;
+          } catch (err) {
+            console.warn('RichTextEditor cleanup failed', err);
+          }
+        }, 300); // Increase if needed
+      } catch (e) {
+        console.warn("Failed to destroy editor", e);
+      }
+    }
 
     rebindAttachments();
     document.querySelectorAll('.alterable.active').forEach(el => {
@@ -276,6 +433,9 @@ function applyPrintSize(){
           @page {
             size: ${size};
             margin: 1in;
+            *::-webkit-scrollbar-track{
+              display: none;
+            }
           }
         }
       `;
@@ -287,23 +447,86 @@ function applyPrintSize(){
           @page {
             size: ${size};
             margin: 1in;
+            *::-webkit-scrollbar-track{
+              display: none;
+            }
           }
         }
       `;
     } 
-    else if(type === '1080'){
+    else if(type === '1920'){
       dynamicPageStyle.textContent = `
         @media print {
           @page {
             size: 1920px 1080px;
             margin: 1in;
           }
+          body {
+            margin: 0;
+            padding: 0; 
+          }
+          /* #mainPage{
+            width: 1080px;
+          } */
+      
         }
       `;
     } else {
       dynamicPageStyle.textContent = ``;
     }
   }
+}
+
+const contentElLeft = document.querySelector('#toolbararea .content');
+const SCROLL_KEY_LEFT = 'toolbarContentScrollTop';
+
+// Restore scroll position on page load
+window.addEventListener('DOMContentLoaded', () => {
+  const savedScroll = localStorage.getItem(SCROLL_KEY_LEFT);
+  if (savedScroll !== null) {
+    contentElLeft.scrollTop = parseInt(savedScroll, 10);
+  }
+});
+
+// Save scroll position before page unload
+contentElLeft.addEventListener('scroll', () => {
+  localStorage.setItem(SCROLL_KEY_LEFT, contentElLeft.scrollTop);
+});
+
+function printthis(){
+  let originalx = [];
+  let originaly = [];
+  let type = localStorage.getItem('pageSize');
+  window.onbeforeprint = () => {
+    console.log('Print dialog is about to open');
+    if(type === '1920'){
+      const elements = mainPage.querySelectorAll('[style*="transform: translate"]');
+      elements.forEach(el => {
+          const style = el.style.transform;
+          const match = style.match(/translate\(\s*([-0-9.]+)px\s*,\s*([-0-9.]+)px\s*\)/);
+          let pageWidth = mainPage.offsetWidth;
+          let pageHeight = mainPage.offsetHeight;
+          if (match) {
+              const x = parseFloat(match[1]);
+              const y = parseFloat(match[2]);
+              originalx[el] = x;
+              originaly[el] = y;
+              const newX = x * 3;
+              const newY = y * 3; 
+              el.style.transform = `translate(${newX}px, ${newY}px)`;
+              saveTransformToLocalStorage(el, x, y);
+          }
+      });
+    }
+  };
+
+  window.onafterprint = () => {
+    console.log('Print dialog was closed (printed or canceled)');
+    location.reload(true);
+  };
+
+  // Trigger print
+  window.print();
 }
 
 // Save scroll position before page unload
@@ -322,7 +545,7 @@ window.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, parseInt(scrollY));
   }
 
-  /* applyMainPageStyle(); */
+  applyMainPageStyle();
   applyPrintSize();
 
   const savedToggleState = localStorage.getItem('followToggleState') || 'on'; // default to 'on'
@@ -603,6 +826,7 @@ function enableDrag(target, handle) { console.log('drag-enabled-for::',target);
   let startX = 0, startY = 0;
 
   handle.addEventListener('mousedown', e => { 
+    pageSizeSelect.selectedIndex = 0;
     e.stopPropagation();
     document.body.style.overflow = 'hidden';
     disableTextSelection();
@@ -753,6 +977,7 @@ function getElementStorageKey(element, index = null) {
 function enableResize(target, handle) {
   handle.addEventListener('mousedown', e => {
     e.stopPropagation();
+    pageSizeSelect.selectedIndex = 0;
     const startWidth = target.offsetWidth;
     const startHeight = target.offsetHeight;
     const startX = e.clientX;
@@ -763,6 +988,10 @@ function enableResize(target, handle) {
       const newHeight = startHeight + (e.clientY - startY);
       target.style.width = `${newWidth}px`;
       target.style.height = `${newHeight}px`;
+
+      if(syncElements){
+        resizeAndSync(target, newWidth, newHeight);
+      }
     }
 
     function onMouseUp() {
@@ -772,6 +1001,33 @@ function enableResize(target, handle) {
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
+  });
+}
+
+function resizeAndSync(target, width, height) {
+  // Ensure it's inside a .QuestionArea and is alterable
+  const insideQuestionArea = !!target.closest('.QuestionArea');
+  if (!insideQuestionArea || !target.classList.contains('alterable')) {
+  console.log('Target not inside .QuestionArea or not .alterable');
+  return;
+  }
+
+  // Get the tag name and text content to match similar elements
+  const tagName = target.tagName.toLowerCase();
+  const content = target.textContent.trim();
+
+  console.log(`Matching tag <${tagName}> with content: "${content}"`);
+
+  // Find all similar alterable elements inside .QuestionArea
+  const allMatching = Array.from(document.querySelectorAll(`.QuestionArea ${tagName}.alterable`))
+  .filter(el => el.textContent.trim() === content);
+
+  console.log(`Found ${allMatching.length} matching elements.`);
+
+  // Apply transform to all matches
+  allMatching.forEach((el, i) => { console.log('el::',el, '-- width::', width, '-- height::', height);
+    el.style.width = `${width}px`;
+    el.style.height = `${height}px`;
   });
 }
 
@@ -822,7 +1078,13 @@ function applySavedFollowSetting(){
   });
 }
 
-function saveMainPageStyle() {
+function saveMainPageStyle(type) { 
+  /* if(type === 'a4' || type === 'letter'){
+    let newcss = mainPage.style.cssText.replace('70', '91');
+    localStorage.setItem('mainPageStyle', newcss);
+  } else {
+    localStorage.setItem('mainPageStyle', mainPage.style.cssText);
+  } */
   localStorage.setItem('mainPageStyle', mainPage.style.cssText);
 }
 
@@ -830,8 +1092,7 @@ function changePageWidth(type){ console.log('type::',type);
   if(type === 'a4' || type === 'letter'){
     mainPage.style.width = '70%';
     mainPage.style?.removeProperty('height');
-  } else if(type === '1080'){
-    mainPage.style.height = '1920px';
+  } else if(type === '1920'){
     mainPage.style.width = '1080px';
   } else {
     mainPage.style.width = '100%';
@@ -844,7 +1105,7 @@ document.getElementById('pageSizeSelect').addEventListener('change', function ()
   localStorage.setItem('pageSize', currentPageSize);
   changePageWidth(currentPageSize);
   applySavedPositions();
-  saveMainPageStyle();
+  saveMainPageStyle(currentPageSize);
 
   setTimeout(() => {
     location.reload(true);
@@ -1307,6 +1568,8 @@ function getComputedDimensionsInches(element, offsetW = 0.00, offsetH = 0.00) {
 
     // Iterate over each QuestionArea element
     questionAreas.forEach((questionArea, index) => {
+      let pagewidth = questionArea.offsetWidth;
+      let pageheight = questionArea.offsetHeight;
         // Create a group object for the current QuestionArea
         const group = {
             id: `Group ${index + 1}`, // Assign a unique ID based on index
@@ -1316,12 +1579,28 @@ function getComputedDimensionsInches(element, offsetW = 0.00, offsetH = 0.00) {
 
         // Select all span and label elements that are descendants of .parent within the current QuestionArea
         // This selects all target elements regardless of their specific parent .parent div
-        const targetElements = questionArea.querySelectorAll('.parent span, .parent label');
+        const targetElements = questionArea.querySelectorAll('.parent span, .parent label, .QuestionArea img');
 
         // Iterate over the found elements in document order
-        targetElements.forEach(element => {
+        targetElements.forEach(element => { 
             // Check if the element has display: none
             if (!isDisplayNone(element)) {
+               // Check if it's an image
+                if (element.tagName.toLowerCase() === 'img' && element.src.startsWith('data:image')) {
+                  var { x, y } = getRelativePositionInchesForPPT(element, questionArea, 0.2, 0.2);
+                  var { w, h } = getComputedDimensionsInches(element, -2.5);
+
+                  slideGroup[index].push({
+                    type: 'image',
+                    data: element.src, // base64 image
+                    x: x,
+                    y: y,
+                    w: w,
+                    h: h
+                  });
+
+                  return; // skip further text processing
+                }
                 // Get the text content using the helper function
                 const text = getElementText(element);
                 let fontsize = '10px';
@@ -1392,7 +1671,9 @@ function getComputedDimensionsInches(element, offsetW = 0.00, offsetH = 0.00) {
                       x: x, 
                       y: y,
                       w: w,
-                      h: h
+                      h: h,
+                      pw: pagewidth,
+                      ph: pageheight
                     });
                 }
             }
@@ -1411,22 +1692,58 @@ const result = extractVisibleTextWithRefinedLabels();
 console.log(JSON.stringify(result, null, 2));
 
 const pptx = new PptxGenJS();
-// Generate slides
-result.forEach((group, index) => {
-        const slide = pptx.addSlide();
 
-        group.forEach(item => {
-          slide.addText(item.text, {
-            x: item.x,
-            y: item.y,
-            w: item.w,
-            h: item.h,
-            bold: item.bold,
-            fontSize: item.fontSize,
-            color: item.color,
-            fontFace: 'Arial'
-          });
+/* // Step 1: Measure max dimensions
+let maxWidth = 0;
+let maxHeight = 0;
+
+result.forEach(group => {
+  group.forEach(item => {
+    const w = (item.x || 0) + (item.w || 0);
+    const h = (item.y || 0) + (item.h || 0);
+    maxWidth = Math.max(maxWidth, w);
+    maxHeight = Math.max(maxHeight, h);
+  });
+});
+
+// Step 2: Define layout once based on max dimensions
+pptx.defineLayout({ name: 'DynamicLayout', width: maxWidth, height: maxHeight });
+pptx.layout = 'DynamicLayout'; */
+
+// Generate slides
+result.forEach((group, index) => { console.log('group===',group);
+        let pageheight = 0;
+        let pagewidth = 0;
+        group.forEach(itemn => {
+          pageheight = itemn.ph;
+          pagewidth = itemn.pw;
         });
+
+          pptx.defineLayout({ width: pagewidth, height: pageheight });
+          
+          const slide = pptx.addSlide();
+          group.forEach(item => {
+            if(item.type == 'image'){
+              slide.addImage({
+                data: item.data,
+                x: item.x,
+                y: item.y,
+                w: item.w,
+                h: item.h
+              });
+            } else {
+              slide.addText(item.text, {
+                x: item.x,
+                y: item.y,
+                w: item.w,
+                h: item.h,
+                bold: item.bold,
+                fontSize: item.fontSize,
+                color: item.color,
+                fontFace: 'Arial'
+              });
+            }
+          });
       });
 
   pptx.writeFile("GroupedTextSlides.pptx");
