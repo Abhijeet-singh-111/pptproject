@@ -27,7 +27,7 @@ body {
 
 .image-wrapper img {
     display: block;
-    width: 200px;
+    width: auto;
     height: auto;
     user-select: none;
     pointer-events: none;
